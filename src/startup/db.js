@@ -1,6 +1,6 @@
 import Sequelize from 'sequelize';
 
-export default new Sequelize(
+const sequelize = new Sequelize(
   'postgres',
   process.env.POSTGRES_DB,
   process.env.POSTGRES_PASSWORD,
@@ -15,3 +15,16 @@ export default new Sequelize(
     },
   }
 );
+
+// console.log(models)
+export default sequelize;
+
+exports.dbInit = async function () {
+  try {
+    await sequelize.authenticate();
+    console.log(`db on...`);
+  } catch (err) {
+    console.error(err);
+    process.exit(1);
+  }
+};
