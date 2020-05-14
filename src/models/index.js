@@ -5,7 +5,7 @@ import sequelize from '../startup/db';
 
 export default async function () {
   try {
-    sequelize.sync({ force: true });
+    sequelize.sync();
   } catch (err) {
     console.error(err);
   }

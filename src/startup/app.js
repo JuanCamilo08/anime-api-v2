@@ -1,6 +1,7 @@
 import laabr from 'laabr';
-import animeRoutes from '../controllers/anime';
-import genreRoutes from '../controllers/genre';
+import Joi from '@hapi/joi';
+import animeRoutes from '../controllers/animes';
+import genreRoutes from '../controllers/genres';
 // eslint-disable-next-line import/named
 import { dbInit } from './db';
 import defineAsync from '../models/index';
@@ -16,6 +17,7 @@ export default async function (server) {
     await dbInit();
     defineAsync();
 
+    server.validator(Joi);
     await server.register({
       plugin: laabr,
       options: laabrOptions,

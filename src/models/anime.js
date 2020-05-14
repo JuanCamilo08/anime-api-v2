@@ -1,4 +1,5 @@
 import { DataTypes, Model } from 'sequelize';
+import Joi from '@hapi/joi';
 import sequelize from '../startup/db';
 import Genre from './genre';
 
@@ -19,7 +20,14 @@ Anime.init(
   }
 );
 
-Anime.belongsToMany(Genre, { through: 'anime_genres' });
+Anime.belongsToMany(Genre, { through: 'anime_genres', as: 'genres' });
 Genre.belongsToMany(Anime, { through: 'anime_genres' });
 
 export default Anime;
+
+exports.validateAnime = {
+  name: Joi.string().required().min(4).max(70),
+  description: Joi.string().min(10).max(1000),
+  seasons: Joi.any().required(),
+  genres: Joi.array().items(Joi.number()).min(1),
+};

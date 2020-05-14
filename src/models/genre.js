@@ -1,4 +1,5 @@
 import { DataTypes, Model } from 'sequelize';
+import Joi from '@hapi/joi';
 import sequelize from '../startup/db';
 
 class Genre extends Model {}
@@ -19,3 +20,7 @@ Genre.init(
 );
 
 export default Genre;
+
+export const validateGenre = {
+  name: Joi.string().required().min(4).max(100),
+};
