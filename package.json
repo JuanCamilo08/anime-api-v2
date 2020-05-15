@@ -6,6 +6,7 @@
   "scripts": {
     "build": "babel src/ -d dist",
     "start-dev": "nodemon --exec babel-node -r dotenv/config src/index.js",
+    "start-prod": "node dist/index.js",
     "lint": "node_modules/.bin/eslint src/",
     "prettier": "node_modules/.bin/prettier src/"
   },

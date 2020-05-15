@@ -1,0 +1,23 @@
+version: '3'
+
+services:
+  hapi-app:
+    build: .
+    image: hapi-app:1.0
+    restart: always
+    container_name: hapi-app
+    ports:
+      - '3000:3000'
+    depends_on:
+      - postgres
+  postgres:
+    image: postgres:12
+    restart: always
+    container_name: db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - 'dbdata:/var/lib/postgresql/data'
+volumes:
+  dbdata:
