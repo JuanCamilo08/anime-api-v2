@@ -25,7 +25,7 @@ Genre.belongsToMany(Anime, { through: 'anime_genres' });
 
 export default Anime;
 
-exports.validateAnime = {
+export const validateAnime = {
   name: Joi.string().required().min(4).max(70),
   description: Joi.string().min(10).max(1000),
   seasons: Joi.any().required(),
