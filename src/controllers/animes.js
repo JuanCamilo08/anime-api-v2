@@ -1,3 +1,6 @@
+import { Op } from 'sequelize';
+import Joi from '@hapi/joi';
+import _ from 'underscore';
 import Anime, { validateAnime } from '../models/anime';
 import Genre from '../models/genre';
 import validateId from '../utils/validateId';
@@ -7,17 +10,51 @@ export default function (server) {
     path: '/animes',
     method: 'GET',
     handler: async (request, handler) => {
-      try {
-        const animes = await Anime.findAll({
-          include: [
-            { model: Genre, as: 'genres', through: { attributes: [] } },
-          ],
-        });
+      const { genre, ...queries } = _.pick(request.query, [
+        'name',
+        'description',
+        'genre',
+      ]);
 
+      const options = {
+        include: [
+          {
+            model: Genre,
+            as: 'genres',
+            through: {
+              attributes: [],
+            },
+            required: true,
+          },
+        ],
+      };
+
+      if (genre)
+        options.include[0].where = {
+          name: genre,
+        };
+
+      if (queries)
+        options.where = Object.entries(queries).reduce((obj, [key, value]) => {
+          return { ...obj, [key]: { [Op.iRegexp]: value } };
+        }, null);
+
+      try {
+        const animes = await Anime.findAll(options);
         return handler.response(animes);
       } catch (err) {
-        return handler.response(err.details[0].message).code(500);
+        return handler.response(err.message).code(500);
       }
+    },
+    options: {
+      validate: {
+        query: {
+          name: Joi.string().max(70),
+          description: Joi.string().max(1000),
+          genre: Joi.string().max(100),
+        },
+        failAction: 'error',
+      },
     },
   });
 
@@ -39,12 +76,13 @@ export default function (server) {
 
         return handler.response(anime[0]);
       } catch (err) {
-        return handler.response(err.details[0].message).code(500);
+        return handler.response(err.message).code(500);
       }
     },
     options: {
       validate: {
         params: validateId,
+        failAction: 'error',
       },
     },
   });
@@ -63,7 +101,7 @@ export default function (server) {
 
         return handler.response(anime).code(201);
       } catch (err) {
-        return handler.response(err.details[0].message).code(500);
+        return handler.response(err.message).code(500);
       }
     },
   });
@@ -80,7 +118,7 @@ export default function (server) {
 
         return handler.response('The anime has been updated!');
       } catch (err) {
-        return handler.response(err.details[0].message).code(500);
+        return handler.response(err.message).code(500);
       }
     },
     options: {
@@ -104,7 +142,7 @@ export default function (server) {
 
         return handler.response('the anime has been deleted!');
       } catch (err) {
-        return handler.response(err.details[0].message).code(500);
+        return handler.response(err.message).code(500);
       }
     },
     options: {

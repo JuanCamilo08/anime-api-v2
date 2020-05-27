@@ -27,6 +27,7 @@ export default async function (server) {
     genreRoutes(server);
 
     await server.start();
+    console.info(server.info.uri);
   } catch (err) {
     console.error(err.message);
   }
