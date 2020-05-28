@@ -10,13 +10,20 @@ export default function (server) {
     path: '/animes',
     method: 'GET',
     handler: async (request, handler) => {
-      const { genre, ...queries } = _.pick(request.query, [
+      const { genre, limit = 5, page = 1, ...queries } = _.pick(request.query, [
         'name',
         'description',
         'genre',
+        'page',
+        'limit',
       ]);
 
+      const offset = limit * (page - 1);
+      const endPage = limit * page;
+
       const options = {
+        offset,
+        limit,
         include: [
           {
             model: Genre,
@@ -40,8 +47,13 @@ export default function (server) {
         }, null);
 
       try {
-        const animes = await Anime.findAll(options);
-        return handler.response(animes);
+        const result = {};
+        const { rows, count } = await Anime.findAndCountAll(options);
+        result.data = rows;
+        result.current_page = page;
+        result.total_animes = count - 1;
+        result.has_next_page = !!(endPage < result.total_animes);
+        return handler.response(result);
       } catch (err) {
         return handler.response(err.message).code(500);
       }
@@ -52,6 +64,8 @@ export default function (server) {
           name: Joi.string().max(70),
           description: Joi.string().max(1000),
           genre: Joi.string().max(100),
+          limit: Joi.number().min(1).max(100),
+          page: Joi.number().min(1),
         },
         failAction: 'error',
       },
